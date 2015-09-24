@@ -9,10 +9,10 @@ Gabriel Rassoul - Belkacem Lahouel - Donatien Rabiller - Pierre Galmiche
   
 ## HOW DOES IT WORK?  
 - Unreal Engine 4.9.1  
-- C++
+- C++  
   
 ## DIRECTORIES  
-TODO
+TODO  
   
 ## TECHNICALITIES WITH GIT  
 You may add an alias for this repository's address: git remote add [alias_name] [repository_address]  
@@ -28,7 +28,7 @@ vim .gitconfig // or any other text editor
 	branch = auto  
   
 [user]  
-	name = [name] 
+	name = [name]  
 	email = [email]  
   
 [alias]  
@@ -48,7 +48,7 @@ A .gitignore file has been added, please use it as intended.
 Read this: http://stackoverflow.com/questions/18225126/how-to-use-git-for-unity-source-control  
   
 Finally, please use those commit rules, as much as possible, even though this is really annoying:  
-(1) Language: english 
+(1) Language: english  
 (2)	Title: summary of big modifications  
 (3)	Skip a line  
 (4)	Detail of small modifications afterwards.  
