@@ -3,8 +3,16 @@
 #pragma once
 
 #include "GameFramework/Pawn.h"
-#include "RotableActor.h"
 #include "PlayerPawn.generated.h"
+
+class UMovable;
+
+UENUM(BlueprintType)
+enum class EInteractionType : uint8
+{
+	IT_Rotation UMETA(DisplayName = "Rotation"),
+	IT_Translation UMETA(DisplayName = "Translation"),
+};
 
 UCLASS()
 class PUZZORS_API APlayerPawn : public APawn
@@ -31,7 +39,8 @@ public:
 	void YawCamera(float AxisValue);
 
 	void ToggleCursor();
-	void Interact();
+	void InteractStart();
+	void InteractEnd();
 
 protected:
 	bool bShowCursor;
@@ -47,5 +56,19 @@ protected:
 		float RotSpeed;
 
 	UPROPERTY(EditAnywhere)
+		float RotationTweaker;
+
+	UPROPERTY(EditAnywhere)
+		float TranslationTweaker;
+
+	UPROPERTY(EditAnywhere)
 		float Range;
+
+private:
+	APlayerController* mController;
+	bool mMousePressed;
+	UMovable* mTarget;
+
+	UPROPERTY(EditAnywhere)
+		EInteractionType InteractionType;
 };

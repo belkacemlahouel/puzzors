@@ -3,9 +3,11 @@
 #include "Puzzors.h"
 #include "PlayerPawn.h"
 
+#include "Movable.h"
+
 
 // Sets default values
-APlayerPawn::APlayerPawn()
+APlayerPawn::APlayerPawn() : bShowCursor(false), mController(NULL), mTarget(NULL)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -15,8 +17,6 @@ APlayerPawn::APlayerPawn()
 	Camera->AttachTo(RootComponent);
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-
-	bShowCursor = false;
 }
 
 // Called when the game starts or when spawned
@@ -53,12 +53,45 @@ void APlayerPawn::Tick( float DeltaTime )
 			Camera->SetWorldRotation(NewRotation);
 		}
 	}
+	else
+	{
+		if (mMousePressed && mTarget != NULL)
+		{
+			FVector pos, dir;
+			if(mController->DeprojectMousePositionToWorld(pos, dir))
+			{
+				if (InteractionType == EInteractionType::IT_Rotation)
+				{
+					FVector forward = FVector(dir.X, dir.Y, 0);
+					forward.Normalize();
+					FVector right = FVector::CrossProduct(FVector::UpVector, forward);
+					right.Normalize();
+					right = mTarget->GetOwner()->GetActorRotation().UnrotateVector(right);
+
+					FRotator yaw(0, -CameraInput.X*RotationTweaker, 0);
+					FQuat quat(right, FMath::DegreesToRadians(CameraInput.Y*RotationTweaker));
+					mTarget->Move(yaw, FVector::ZeroVector);
+					mTarget->Move(quat.Rotator(), FVector::ZeroVector);
+				}
+				else if (InteractionType == EInteractionType::IT_Translation)
+				{
+					FVector forward = FVector(dir.X, dir.Y, 0);
+					forward.Normalize();
+					FVector right = FVector::CrossProduct(FVector::UpVector, forward);
+					right.Normalize();
+
+					FVector move = forward * CameraInput.Y * TranslationTweaker + right * CameraInput.X * TranslationTweaker;
+					mTarget->Move(FRotator::ZeroRotator, move);
+				}
+			}
+		}
+	}
 
 	{
 		if (!MovementInput.IsZero())
 		{
 			//Scale our movement input axis values by 100 units per second
-			MovementInput = MovementInput.SafeNormal() * 100.0f;
+			MovementInput = MovementInput.GetSafeNormal() * 100.0f;
 			FVector NewLocation = GetActorLocation();
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime * MaxSpeed;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime * MaxSpeed;
@@ -75,7 +108,8 @@ void APlayerPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	//Hook show cursor handle
 	InputComponent->BindAction("ToggleCursor", IE_Released, this, &APlayerPawn::ToggleCursor);
-	InputComponent->BindAction("Interact", IE_Released, this, &APlayerPawn::Interact);
+	InputComponent->BindAction("Interact", IE_Pressed, this, &APlayerPawn::InteractStart);
+	InputComponent->BindAction("Interact", IE_Released, this, &APlayerPawn::InteractEnd);
 
 	//Hook up every-frame handling for our four axes
 	InputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
@@ -117,6 +151,7 @@ void APlayerPawn::ToggleCursor()
 		if (!bShowCursor)
 		{
 			APlayerController* controller = GetController()->CastToPlayerController();
+			mController = controller;
 			controller->bShowMouseCursor = true;
 			controller->bEnableClickEvents = true;
 			controller->bEnableMouseOverEvents = true;
@@ -133,6 +168,7 @@ void APlayerPawn::ToggleCursor()
 			controller->bEnableClickEvents = false;
 			controller->bEnableMouseOverEvents = false;
 
+
 			FViewport* v = CastChecked<ULocalPlayer>(controller->Player)->ViewportClient->Viewport;
 			v->GetMousePos(MousePosSave);
 
@@ -141,14 +177,16 @@ void APlayerPawn::ToggleCursor()
 	}
 }
 
-void APlayerPawn::Interact()
+void APlayerPawn::InteractStart()
 {
 	if (!bShowCursor) return;
 
 	if (this->GetController()->IsLocalPlayerController())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("<APlayerPawn>: Interact Start"));
-		APlayerController* controller = GetController()->CastToPlayerController();
+		mMousePressed = true;
+
+		APlayerController* controller = mController;
 		FVector pos, dir;
 		if (controller->DeprojectMousePositionToWorld(pos, dir))
 		{
@@ -157,14 +195,28 @@ void APlayerPawn::Interact()
 			{
 				FString name = hit.GetActor()->GetName();
 				UE_LOG(LogTemp, Warning, TEXT("<APlayerPawn>: Ray Hit - %s"), *name);
-				TArray<URotableActor*> comp;
-				hit.GetActor()->GetComponents<URotableActor>(comp);
+				TArray<UMovable*> comp;
+				hit.GetActor()->GetComponents<UMovable>(comp);
 				if (comp.Num() > 0)
 				{
-					comp[0]->Rotate();
+					mTarget = comp[0];
+				}
+				else
+				{
+					mTarget = NULL;
 				}
 			}
+			else
+			{
+				mTarget = NULL;
+			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("<APlayerPawn>: Interact End"));
 	}
+}
+
+void APlayerPawn::InteractEnd()
+{
+	mTarget = NULL;
+	mMousePressed = false;
+	UE_LOG(LogTemp, Warning, TEXT("<APlayerPawn>: Interact End"));
 }

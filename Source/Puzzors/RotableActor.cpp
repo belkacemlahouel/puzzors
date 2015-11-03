@@ -34,9 +34,24 @@ void URotableActor::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 	// ...
 }
 
-void URotableActor::Rotate()
+void URotableActor::Rotate(const FRotator& _rotator)
 {
 	FRotator rot = GetOwner()->GetActorRotation();
-	rot.Add(0, RotateStep, 0);
-	this->GetOwner()->SetActorRotation(rot);
+
+	rot.Add(_rotator.Pitch, _rotator.Yaw, _rotator.Roll);
+	float pitch = rot.Pitch;
+	if (pitch > 20)
+		pitch = 20;
+	else if (pitch < -20)
+		pitch = -20;
+
+	float roll = rot.Roll;
+	if (roll > 20)
+		roll = 20;
+	else if (rot.Roll < -20)
+		roll = -20;
+
+	FRotator rot2(pitch, rot.Yaw, roll);
+
+	this->GetOwner()->SetActorRelativeRotation(rot2);
 }

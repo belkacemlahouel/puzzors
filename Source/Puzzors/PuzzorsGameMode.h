@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/GameMode.h"
+#include "MainPlayerController.h"
 #include "PuzzorsGameMode.generated.h"
 
 /**
@@ -12,8 +13,5 @@ UCLASS()
 class PUZZORS_API APuzzorsGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
-	
-	
 	
 };

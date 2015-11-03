@@ -3,18 +3,18 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "RotableActor.generated.h"
+#include "Movable.generated.h"
 
+class IMoveEventHandler;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PUZZORS_API URotableActor : public UActorComponent
+class PUZZORS_API UMovable : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	URotableActor();
+	UMovable();
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -22,10 +22,17 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	virtual void Rotate(const FRotator& _rotator);
+	void Move(const FRotator& _RotationDeltas, const FVector& _TranslationDeltas);
+
+	void AddEventHandler(IMoveEventHandler* _handler);
+	void RemoveEventHandler(IMoveEventHandler* _handler);
+
+protected:
+	virtual void Rotate(const FRotator& _Deltas);
+	virtual void Translate(const FVector& _Deltas);
 
 private:
-	UPROPERTY(EditAnywhere)
-		float RotateStep;
-	
+	void SendMoveEvent();
+	TArray<IMoveEventHandler*> m_MoveEventHandlers;
+
 };
