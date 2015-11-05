@@ -6,7 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "LazorManager.generated.h"
 
-class Lazor;
+class ULazor;
 class UMirror;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -26,9 +26,10 @@ public:
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
 	// Create a Lazor emitted by _source actor, at _inPos position and going to _inDir direction.
-	Lazor* CreateLazor(const FVector& _inPos, const FVector& _inDir, const AActor* _source);
+	UFUNCTION(BlueprintCallable, Category = "Lazor Creation")
+		ULazor* CreateLazor(const FVector& _inPos, const FVector& _inDir, const AActor* _source);
 
-	void UpdateLazor(Lazor* _lazor);
+	void UpdateLazor(ULazor* _lazor);
 
 	void OnMove(const UMovable* _sender);
 
@@ -36,12 +37,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effects)
 		UParticleSystem* ParticleTemplate;
 
-	TMap<const AActor*, UParticleSystemComponent*> ParticleSystemComponents;
-	TMap<UParticleSystemComponent*, AActor*> ParticleSystemTargets;
+	TArray<ULazor*> Lazors;
 
-	TMap<const AActor*, Lazor*> Lazors;
+	TMap<const UMovable*, TArray<ULazor*>> LazorTracking;
 	
 private:
 	UParticleSystemComponent* InstantiateParticleSystem(const FVector& _location, const FRotator& _direction);
+	ULazor* InstanciateLazor(UParticleSystemComponent* _particle, const AActor* _source, ULazor* _parent);
+
+	ULazor* CreateLazorInternal(const FVector& _inPos, const FVector& _inDir, const AActor* _source, ULazor* _parent);
+	AActor* ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult);
+
+	void DestroyLazor(ULazor* _lazor);
 
 };

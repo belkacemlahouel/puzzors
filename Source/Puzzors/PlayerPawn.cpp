@@ -68,10 +68,12 @@ void APlayerPawn::Tick( float DeltaTime )
 					right.Normalize();
 					right = mTarget->GetOwner()->GetActorRotation().UnrotateVector(right);
 
-					FRotator yaw(0, -CameraInput.X*RotationTweaker, 0);
 					FQuat quat(right, FMath::DegreesToRadians(CameraInput.Y*RotationTweaker));
-					mTarget->Move(yaw, FVector::ZeroVector);
-					mTarget->Move(quat.Rotator(), FVector::ZeroVector);
+					
+					FRotator rot(quat.Rotator().Pitch, -CameraInput.X*RotationTweaker, quat.Rotator().Roll);
+					
+					if (!rot.IsNearlyZero())
+						mTarget->Move(rot, FVector::ZeroVector);
 				}
 				else if (InteractionType == EInteractionType::IT_Translation)
 				{

@@ -3,20 +3,23 @@
 #include "Puzzors.h"
 #include "Lazor.h"
 
-Lazor::Lazor(Lazor* _parent, UParticleSystemComponent* _particle, const AActor* _source, const AActor* _target)
+ULazor::ULazor() : m_child(NULL), m_parent(NULL), m_source(NULL), m_target(NULL)
+{}
+
+ULazor::ULazor(ULazor* _parent, UParticleSystemComponent* _particle, const AActor* _source, AActor* _target)
 : m_child(NULL), m_parent(_parent), m_particle(_particle), m_source(_source), m_target(_target)
 {
 }
 
-Lazor::~Lazor()
+ULazor::~ULazor()
 {
 }
 
 
-int Lazor::Index() const
+int ULazor::Index() const
 {
 	int i = 0;
-	const Lazor* l = Parent();
+	const ULazor* l = Parent();
 	while (l != NULL)
 	{
 		l = l->Parent();
