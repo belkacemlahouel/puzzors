@@ -8,7 +8,7 @@
 /**
  * 
  */
-UCLASS( ClassGroup = (Custom), meta = (BlueprintSpawnableComponent) )
+UCLASS( Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent) )
 class PUZZORS_API UMirror : public UMovable
 {
 	GENERATED_BODY()

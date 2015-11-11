@@ -62,6 +62,8 @@ void UMovable::SendMoveEvent()
 	{
 		m_MoveEventHandlers[i]->OnMove(this);
 	}
+
+	OnMove();
 }
 
 void UMovable::Rotate(const FRotator& _Deltas)
@@ -77,3 +79,7 @@ void UMovable::Translate(const FVector& _Deltas)
 	GetOwner()->SetActorLocation(loc + _Deltas);
 }
 
+void UMovable::OnMove_Implementation()
+{
+
+}

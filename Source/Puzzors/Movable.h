@@ -7,7 +7,7 @@
 
 class IMoveEventHandler;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PUZZORS_API UMovable : public UActorComponent
 {
 	GENERATED_BODY()
@@ -26,6 +26,9 @@ public:
 
 	void AddEventHandler(IMoveEventHandler* _handler);
 	void RemoveEventHandler(IMoveEventHandler* _handler);
+
+	UFUNCTION(BlueprintNativeEvent)
+		void OnMove();
 
 protected:
 	virtual void Rotate(const FRotator& _Deltas);

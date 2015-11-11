@@ -3,11 +3,11 @@
 #include "Puzzors.h"
 #include "Lazor.h"
 
-ULazor::ULazor() : m_child(NULL), m_parent(NULL), m_source(NULL), m_target(NULL)
+ULazor::ULazor() : m_child(NULL), m_parent(NULL), m_target(NULL)
 {}
 
-ULazor::ULazor(ULazor* _parent, UParticleSystemComponent* _particle, const AActor* _source, AActor* _target)
-: m_child(NULL), m_parent(_parent), m_particle(_particle), m_source(_source), m_target(_target)
+ULazor::ULazor(ULazor* _parent, UParticleSystemComponent* _particle, AActor* _target)
+: m_child(NULL), m_parent(_parent), m_particle(_particle), m_target(_target)
 {
 }
 
@@ -26,4 +26,26 @@ int ULazor::Index() const
 		++i;
 	}
 	return i;
+}
+
+bool ULazor::IsChild(ULazor* _lazor)
+{
+	ULazor* l = Child();
+	while (l != NULL)
+	{
+		if (l == _lazor)
+			return true;
+		l = l->Child();
+	}
+	return false;
+}
+
+void ULazor::DestroyLazor()
+{
+	Target()->Destroy();
+	ParticleSystem()->DestroyComponent();
+	SetChild(NULL);
+	SetParent(NULL);
+
+	DeleteObject(this);
 }

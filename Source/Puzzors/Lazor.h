@@ -8,15 +8,18 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class PUZZORS_API ULazor : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	ULazor();
-	ULazor(ULazor* _parent, UParticleSystemComponent* _particle, const AActor* _source, AActor* _target);
+	ULazor(ULazor* _parent, UParticleSystemComponent* _particle, AActor* _target);
 	~ULazor();
+
+public:
+	void DestroyLazor();
 
 // ----- MUTATOR -----
 public:
@@ -24,27 +27,33 @@ public:
 	void SetChild(ULazor* _child) { m_child = _child; }
 
 	void SetParticleSystem(UParticleSystemComponent* _particle) { m_particle = _particle; }
-	
-	void SetSource(const AActor* _source) { m_source = _source; }
 	void SetTarget(AActor* _target) { m_target = _target; }
 
 	void SetPosition(FVector _position) { m_position = _position; }
 	void SetDirection(FVector _direction) { m_direction = _direction; }
 
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		bool IsChild(ULazor* _lazor);
+
 
 public:
 // ----- ACCESSOR -----
-	ULazor* Parent() const { return m_parent; }
-	ULazor* Child() const { return m_child; }
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		ULazor* Parent() const { return m_parent; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		ULazor* Child() const { return m_child; }
 
-	const AActor* Source() const { return m_source; }
-	AActor* Target() { return m_target; }
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		AActor* Target() { return m_target; }
 
 	const UParticleSystemComponent* ParticleSystem() const { return m_particle; }
 	UParticleSystemComponent* ParticleSystem() { return m_particle; }
 
-	const FVector& Position() { return m_position; }
-	const FVector& Direction() { return m_direction; }
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		FVector Position() const { return m_position; }
+	UFUNCTION(BlueprintCallable, Category = "Lazor")
+		FVector Direction() const { return m_direction; }
 
 	// Count how many parent this lazor has
 	int Index() const;
@@ -55,7 +64,6 @@ private:
 
 	UParticleSystemComponent* m_particle;
 
-	const AActor* m_source;
 	AActor* m_target;
 
 	FVector m_position;
