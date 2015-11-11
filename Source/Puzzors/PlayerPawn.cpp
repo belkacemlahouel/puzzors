@@ -17,6 +17,11 @@ APlayerPawn::APlayerPawn() : bShowCursor(false), mController(NULL), mTarget(NULL
 	Camera->AttachTo(RootComponent);
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	//xoxo
+	previousLocation = FVector(0);
+	previousRotation = FQuat();
+	isOnTop = false;
 }
 
 // Called when the game starts or when spawned
@@ -41,16 +46,19 @@ void APlayerPawn::Tick( float DeltaTime )
 
 	if (!bShowCursor)
 	{
+		if (!isOnTop)
 		{
-			FRotator NewRotation = GetActorRotation();
-			NewRotation.Yaw += CameraInput.X * RotSpeed;
-			SetActorRotation(NewRotation);
-		}
+			{
+				FRotator NewRotation = GetActorRotation();
+				NewRotation.Yaw += CameraInput.X * RotSpeed;
+				SetActorRotation(NewRotation);
+			}
 
-		{
-			FRotator NewRotation = Camera->GetComponentRotation();
-			NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + CameraInput.Y * RotSpeed, -80.0f, 80.0f);
-			Camera->SetWorldRotation(NewRotation);
+			{
+				FRotator NewRotation = Camera->GetComponentRotation();
+				NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + CameraInput.Y * RotSpeed, -80.0f, 80.0f);
+				Camera->SetWorldRotation(NewRotation);
+			}
 		}
 	}
 	else
@@ -113,6 +121,9 @@ void APlayerPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAction("Interact", IE_Pressed, this, &APlayerPawn::InteractStart);
 	InputComponent->BindAction("Interact", IE_Released, this, &APlayerPawn::InteractEnd);
 
+	//xoxo
+	InputComponent->BindAction("SwitchCamera", IE_Released, this, &APlayerPawn::SwitchCamera);
+
 	//Hook up every-frame handling for our four axes
 	InputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerPawn::MoveRight);
@@ -123,16 +134,28 @@ void APlayerPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 void APlayerPawn::MoveForward(float AxisValue)
 {
+	//xoxo
+	if (isOnTop)
+		return;
+
 	MovementInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
 void APlayerPawn::MoveRight(float AxisValue)
 {
+	//xoxo
+	if (isOnTop)
+		return;
+
 	MovementInput.Y = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
 void APlayerPawn::MoveUp(float AxisValue)
 {
+	//xoxo
+	if (isOnTop)
+		return;
+
 	MovementInput.Z = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
@@ -221,4 +244,27 @@ void APlayerPawn::InteractEnd()
 	mTarget = NULL;
 	mMousePressed = false;
 	UE_LOG(LogTemp, Warning, TEXT("<APlayerPawn>: Interact End"));
+}
+
+//xoxo
+void APlayerPawn::SwitchCamera()
+{
+	if (isOnTop)
+	{
+		Camera->SetWorldRotation(previousRotation);
+		SetActorLocation(previousLocation);
+		previousRotation = FQuat();
+		previousLocation = FVector(0);
+		isOnTop = false;
+	}
+	else
+	{
+		previousLocation = GetActorLocation();
+		previousRotation = Camera->GetComponentRotation().Quaternion();
+		FVector myLoc = FVector(0, 0, 1000);
+		SetActorLocation(myLoc); //on-top location
+		FRotator myRot(-90, 0, 0);
+		Camera->SetWorldRotation(myRot.Quaternion()); //looking bot
+		isOnTop = true;
+	}
 }
