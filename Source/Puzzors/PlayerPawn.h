@@ -42,6 +42,9 @@ public:
 	void InteractStart();
 	void InteractEnd();
 
+	//xoxo
+	void SwitchCamera();
+
 protected:
 	bool bShowCursor;
 	FIntPoint MousePosSave;
@@ -49,6 +52,11 @@ protected:
 	UCameraComponent* Camera;
 	FVector MovementInput;
 	FVector2D CameraInput;
+
+	//xoxo
+	FVector previousLocation;
+	FQuat previousRotation;
+	bool isOnTop;
 
 	UPROPERTY(EditAnywhere)
 		float MaxSpeed;
