@@ -67,3 +67,8 @@ DerivedDataCache/*
 *.swo
 .ctrlp_cache/
 
+# Config & stuff
+Config/
+Source/Puzzors.Target.cs
+Source/Puzzors/Puzzors.Build.cs
+Source/PuzzorsEditor.Target.cs
