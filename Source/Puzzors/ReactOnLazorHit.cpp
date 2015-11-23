@@ -13,9 +13,9 @@ UReactOnLazorHit::UReactOnLazorHit()
 	// ...
 }
 
-bool UReactOnLazorHit::IsBouncingLazor_Implementation(ULazor* _lazor, const FVector& _hitPoint)
+bool UReactOnLazorHit::IsBouncingLazor_Implementation(const FVector& _hitPoint)
 {
-	return true;
+	return false;
 }
 
 FVector UReactOnLazorHit::BounceLazor_Implementation(const FVector& _dir)

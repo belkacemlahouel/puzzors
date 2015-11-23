@@ -5,7 +5,6 @@
 #include "Components/ActorComponent.h"
 #include "ReactOnLazorHit.generated.h"
 
-class ULazor;
 class UBeam;
 
 UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,7 +26,7 @@ public:
 		virtual void OnLazorHitEnd(UBeam* _beam);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Lazor Reaction")
-		bool IsBouncingLazor(ULazor* _lazor, const FVector& _hitPoint);
+		bool IsBouncingLazor(const FVector& _hitPoint);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Lazor Reaction")
 		FVector BounceLazor(const FVector& _dir);

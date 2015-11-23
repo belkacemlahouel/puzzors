@@ -19,8 +19,8 @@ public:
 	FVector GetNormal() const;
 
 protected:
-	void Rotate(const FRotator& _Deltas);
-	void Translate(const FVector& _Deltas);
+	virtual void Rotate_Implementation(const FRotator& _Deltas) override;
+	virtual void Translate_Implementation(const FVector& _Deltas) override;
 
 private:
 	void ClampRotation(FRotator& _Rotation);

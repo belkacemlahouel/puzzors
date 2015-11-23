@@ -11,7 +11,7 @@ FVector UMirror::GetNormal() const
 	return rot.RotateVector(Normal);
 }
 
-void UMirror::Rotate(const FRotator& _Deltas)
+void UMirror::Rotate_Implementation(const FRotator& _Deltas)
 {
 	FRotator rot = GetOwner()->GetActorRotation();
 	rot.Add(_Deltas.Pitch, _Deltas.Yaw, _Deltas.Roll);
@@ -19,7 +19,7 @@ void UMirror::Rotate(const FRotator& _Deltas)
 	GetOwner()->SetActorRotation(rot);
 }
 
-void UMirror::Translate(const FVector& _Deltas)
+void UMirror::Translate_Implementation(const FVector& _Deltas)
 {
 	FVector delta = _Deltas;
 	ClampTranslation(delta);

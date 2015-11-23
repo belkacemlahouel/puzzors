@@ -22,6 +22,7 @@ void ULazorManager::BeginDestroy()
 
 	for (auto var : Beams)
 	{
+		var->ClearBeam(false);
 		DeleteObject(var);
 	}
 	Beams.Empty();
@@ -39,10 +40,4 @@ UBeam* ULazorManager::CreateBeam(const FVector& _inPos, const FVector& _inDir)
 	Beams.Add(beam);
 
 	return beam;
-}
-
-
-void ULazorManager::UpdateBeam(UBeam* _beam)
-{
-
 }

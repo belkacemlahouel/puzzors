@@ -44,42 +44,20 @@ void UMovable::Move(const FRotator& _RotationDeltas, const FVector& _Translation
 	SendMoveEvent();
 }
 
-void UMovable::AddEventHandler(IMoveEventHandler* _handler)
-{
-	if (!m_MoveEventHandlers.Contains(_handler))
-		m_MoveEventHandlers.Add(_handler);
-}
-
-void UMovable::RemoveEventHandler(IMoveEventHandler* _handler)
-{
-	m_MoveEventHandlers.Remove(_handler);
-}
-
 void UMovable::SendMoveEvent()
 {
-	unsigned int size = m_MoveEventHandlers.Num();
-	for (unsigned int i = 0; i < size; ++i)
-	{
-		m_MoveEventHandlers[i]->OnMove(this);
-	}
-
-	OnMove();
+	OnMove.Broadcast();
 }
 
-void UMovable::Rotate(const FRotator& _Deltas)
+void UMovable::Rotate_Implementation(const FRotator& _Deltas)
 {
 	FRotator rot = GetOwner()->GetActorRotation();
 	rot.Add(_Deltas.Pitch, _Deltas.Yaw, _Deltas.Roll);
 	GetOwner()->SetActorRotation(rot);
 }
 
-void UMovable::Translate(const FVector& _Deltas)
+void UMovable::Translate_Implementation(const FVector& _Deltas)
 {
 	FVector loc = GetOwner()->GetActorLocation();
 	GetOwner()->SetActorLocation(loc + _Deltas);
-}
-
-void UMovable::OnMove_Implementation()
-{
-
 }

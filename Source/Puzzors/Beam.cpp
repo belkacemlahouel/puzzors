@@ -3,7 +3,6 @@
 #include "Puzzors.h"
 #include "Beam.h"
 #include "LazorManager.h"
-#include "Lazor.h"
 #include "LazorTarget.h"
 #include "ReactOnLazorHit.h"
 
@@ -16,6 +15,18 @@ UBeam::UBeam(const FVector& _position, const FVector& _direction, ULazorManager*
 UBeam::~UBeam()
 {}
 
+void UBeam::Activate()
+{
+	FireBeam();
+	m_manager->GetWorld()->GetTimerManager().SetTimer(m_TimerHandle, this, &UBeam::FireBeam, 0.10f, true);
+}
+
+void UBeam::Deactivate()
+{
+	m_manager->GetWorld()->GetTimerManager().ClearTimer(m_TimerHandle);
+	ClearBeam(true);
+}
+
 void UBeam::FireBeam()
 {
 	if (!Initialized())
@@ -27,7 +38,7 @@ void UBeam::FireBeam()
 	bool loop;
 
 	FVector pos = m_position, dir = m_direction;
-	ULazor* lazor = NULL;
+	FLazor* lazor = NULL;
 	do
 	{
 		loop = false;
@@ -54,7 +65,7 @@ void UBeam::FireBeam()
 			{
 				m_hit.Add(FLazorHit(reactor, lazor, hit));
 				reactor->OnLazorHit(hit.ImpactPoint, dir, this);
-				if (lazor->Index() < 10 && reactor->IsBouncingLazor(lazor, hit.ImpactPoint))
+				if (lazor->Index() < 10 && reactor->IsBouncingLazor(hit.ImpactPoint))
 				{
 					pos = hit.ImpactPoint;
 					dir = reactor->BounceLazor(dir);
@@ -82,7 +93,7 @@ void UBeam::FireBeam()
 
 		if (!found) // newly hit
 		{
-			h.reactor->OnLazorHitBegin(h.hit.ImpactPoint, h.lazor->Direction(), this);
+			h.Reactor()->OnLazorHitBegin(h.hit.ImpactPoint, h.Lazor()->Direction(), this);
 		}
 	}
 
@@ -101,18 +112,16 @@ void UBeam::FireBeam()
 
 		if (!found) // was hit but now is not
 		{
-			oh.reactor->OnLazorHitEnd(this);
+			oh.Reactor()->OnLazorHitEnd(this);
 		}
 	}
-
-
 }
 
 bool UBeam::HasHit(UReactOnLazorHit* _reactor)
 {
 	for (auto lh : m_hit)
 	{
-		if (lh.reactor == _reactor)
+		if (lh.Reactor() == _reactor)
 			return true;
 	}
 
@@ -124,17 +133,18 @@ void UBeam::ClearBeam(bool _callHitEnd)
 	if (_callHitEnd)
 	{
 		for (auto lh : m_hit)
-			lh.reactor->OnLazorHitEnd(this);
+			lh.Reactor()->OnLazorHitEnd(this);
 	}
 
-	ULazor* l = m_root;
-	ULazor* temp = NULL;
+	FLazor* l = m_root;
+	FLazor* temp = NULL;
 	while (l != NULL)
 	{
 		temp = l;
 		l = l->Child();
+		
 		temp->DestroyLazor();
-		DeleteObject(temp);
+		delete temp;
 	}
 	m_root = NULL;
 
@@ -173,15 +183,15 @@ UParticleSystemComponent* UBeam::InstantiateParticleSystem(const FVector& _locat
 
 	return particleSystem;
 }
-
-ULazor* UBeam::InstanciateLazor(UParticleSystemComponent* _particle, ULazor* _parent)
+/*
+FLazor* UBeam::InstanciateLazor(UParticleSystemComponent* _particle, FLazor* _parent)
 {
-	ULazor* lazor = NewObject<ULazor>();
+	FLazor* lazor = new FLazor();
 	lazor->SetParticleSystem(_particle);
 	lazor->SetParent(_parent);
 	if (_parent != NULL) _parent->SetChild(lazor);
 	return lazor;
-}
+}*/
 
 AActor* UBeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult)
 {

@@ -7,6 +7,8 @@
 
 class IMoveEventHandler;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMoveDelegate);
+
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PUZZORS_API UMovable : public UActorComponent
 {
@@ -24,18 +26,17 @@ public:
 
 	void Move(const FRotator& _RotationDeltas, const FVector& _TranslationDeltas);
 
-	void AddEventHandler(IMoveEventHandler* _handler);
-	void RemoveEventHandler(IMoveEventHandler* _handler);
-
-	UFUNCTION(BlueprintNativeEvent)
-		void OnMove();
+	UPROPERTY(BlueprintAssignable, Category = "Movable")
+		FMoveDelegate OnMove;
 
 protected:
-	virtual void Rotate(const FRotator& _Deltas);
-	virtual void Translate(const FVector& _Deltas);
+	UFUNCTION(BlueprintNativeEvent, Category = "Movable")
+		void Rotate(const FRotator& _Deltas);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Movable")
+		void Translate(const FVector& _Deltas);
 
 private:
 	void SendMoveEvent();
-	TArray<IMoveEventHandler*> m_MoveEventHandlers;
 
 };

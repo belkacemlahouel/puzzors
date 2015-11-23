@@ -41,6 +41,9 @@ public:
 	void ToggleCursor();
 	void InteractStart();
 	void InteractEnd();
+	void ChangeInteractionType();
+
+	void TogglePrecisionMode();
 
 	//xoxo
 	void SwitchCamera();
@@ -71,6 +74,8 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		float Range;
+
+	bool PrecisionMode;
 
 private:
 	APlayerController* mController;

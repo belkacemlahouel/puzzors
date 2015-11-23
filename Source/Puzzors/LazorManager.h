@@ -24,8 +24,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lazor Creation")
 		UBeam* CreateBeam(const FVector& _inPos, const FVector& _inDir);
 
-	void UpdateBeam(UBeam* _beam);
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effects)
 		UParticleSystem* ParticleTemplate;

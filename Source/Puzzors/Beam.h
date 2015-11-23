@@ -7,31 +7,123 @@
 
 class UReactOnLazorHit;
 class ULazorManager;
-class ULazor;
+
+class FLazor
+{
+public:
+	// ---- CONSTRUCTORS -----
+	FLazor() { m_parent = NULL; m_particle = NULL; m_target = NULL; m_child = NULL; }
+	FLazor(FLazor* _parent, UParticleSystemComponent* _particle, AActor* _target)
+		: m_parent(_parent), m_particle(_particle), m_target(_target), m_child(NULL)
+	{
+	}
+
+	~FLazor() { DestroyLazor(); }
+
+	// ----- MUTATOR -----
+	void SetParent(FLazor* _parent) { m_parent = _parent; }
+	void SetChild(FLazor* _child) { m_child = _child; }
+
+	void SetParticleSystem(UParticleSystemComponent* _particle) { m_particle = _particle; }
+	void SetTarget(AActor* _target) { m_target = _target; }
+
+	void SetPosition(FVector _position) { m_position = _position; }
+	void SetDirection(FVector _direction) { m_direction = _direction; }
+
+	// ----- ACCESSORS -----
+	FLazor* Parent() const { return m_parent; }
+	FLazor* Child() const { return m_child; }
+
+	AActor* Target() { return m_target; }
+
+	const UParticleSystemComponent* ParticleSystem() const { return m_particle; }
+	UParticleSystemComponent* ParticleSystem() { return m_particle; }
+
+	FVector Position() const { return m_position; }
+	FVector Direction() const { return m_direction; }
+
+
+
+	// ---- FUNCTIONS ----
+	bool IsChild(FLazor* _lazor)
+	{ 
+		FLazor* l = Child();
+		while (l != NULL)
+		{
+			if (l == _lazor)
+				return true;
+			l = l->Child();
+		}
+		return false;
+	}
+
+	// Count how many parent this lazor has
+	int Index() const
+	{
+		int i = 0;
+		const FLazor* l = Parent();
+		while (l != NULL)
+		{
+			l = l->Parent();
+			++i;
+		}
+		return i;
+	}
+
+	void DestroyLazor()
+	{
+		if (ParticleSystem() != NULL)
+			ParticleSystem()->DestroyComponent();
+
+		if (Target() != NULL)
+			Target()->Destroy();
+
+		if (Parent() != NULL)
+			Parent()->SetChild(NULL);
+
+		if (Child() != NULL)
+			Child()->SetParent(NULL);
+
+		SetChild(NULL);
+		SetParent(NULL);
+	}
+
+private:
+	// ---- ATTRIBUTES -----
+	FLazor* m_child;
+	FLazor* m_parent;
+	UParticleSystemComponent* m_particle;
+	AActor* m_target;
+
+	FVector m_position;
+	FVector m_direction;
+};
 
 USTRUCT()
 struct FLazorHit
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 		UReactOnLazorHit* reactor;
 	
-	UPROPERTY()
-		ULazor* lazor;
-
-	UPROPERTY()
+	FLazor* lazor;
+	
+	UPROPERTY(EditAnywhere)
 		FHitResult hit;
 
-	FLazorHit(UReactOnLazorHit* _reactor, ULazor* _lazor, FHitResult _hit)
+	FLazor* Lazor() { return lazor; }
+	UReactOnLazorHit* Reactor() { return reactor; }
+
+	~FLazorHit() { reactor = NULL; lazor = NULL; }
+
+	FLazorHit(UReactOnLazorHit* _reactor, FLazor* _lazor, FHitResult _hit) : reactor(_reactor), lazor(_lazor)
 	{
-		reactor = _reactor; lazor = _lazor; hit = _hit;
+		hit = _hit;
 	}
 
 	FLazorHit()
-	{
-		reactor = NULL; lazor = NULL;
-	}
+	{}
 };
 
 /**
@@ -46,6 +138,12 @@ public:
 	UBeam();
 	UBeam(const FVector& _position, const FVector& _direction, ULazorManager* _manager);
 	virtual ~UBeam();
+
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		void Activate();
+	
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		void Deactivate();
 
 	UFUNCTION(BlueprintCallable, Category = "Beam")
 		void FireBeam();
@@ -67,7 +165,7 @@ public:
 	void SetManager(ULazorManager* _manager) { m_manager = _manager; }
 
 private:
-	ULazor* m_root;
+	FLazor* m_root;
 
 	FVector m_position;
 	FVector m_direction;
@@ -76,9 +174,18 @@ private:
 
 	ULazorManager* m_manager;
 
+	FTimerHandle m_TimerHandle;
+
 private:
+	FLazor* InstanciateLazor(UParticleSystemComponent* _particle, FLazor* _parent)
+	{
+		FLazor* lazor = new FLazor();
+		lazor->SetParticleSystem(_particle);
+		lazor->SetParent(_parent);
+		if (_parent != NULL) _parent->SetChild(lazor);
+		return lazor;
+	}
 	UParticleSystemComponent* InstantiateParticleSystem(const FVector& _location, const FRotator& _direction);
-	ULazor* InstanciateLazor(UParticleSystemComponent* _particle, ULazor* _parent);
 
 	AActor* ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult);
 	UReactOnLazorHit* ExtractReactorFromActor(AActor* _actor);

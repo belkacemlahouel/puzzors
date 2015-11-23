@@ -22,6 +22,7 @@ APlayerPawn::APlayerPawn() : bShowCursor(false), mController(NULL), mTarget(NULL
 	previousLocation = FVector(0);
 	previousRotation = FQuat();
 	isOnTop = false;
+	PrecisionMode = false;
 }
 
 // Called when the game starts or when spawned
@@ -76,9 +77,11 @@ void APlayerPawn::Tick( float DeltaTime )
 					right.Normalize();
 					right = mTarget->GetOwner()->GetActorRotation().UnrotateVector(right);
 
-					FQuat quat(right, FMath::DegreesToRadians(CameraInput.Y*RotationTweaker));
+					float tweak = PrecisionMode ? RotationTweaker / 10.0f : RotationTweaker;
+
+					FQuat quat(right, FMath::DegreesToRadians(CameraInput.Y*tweak));
 					
-					FRotator rot(quat.Rotator().Pitch, -CameraInput.X*RotationTweaker, quat.Rotator().Roll);
+					FRotator rot(quat.Rotator().Pitch, -CameraInput.X*tweak, quat.Rotator().Roll);
 					
 					if (!rot.IsNearlyZero())
 						mTarget->Move(rot, FVector::ZeroVector);
@@ -90,7 +93,8 @@ void APlayerPawn::Tick( float DeltaTime )
 					FVector right = FVector::CrossProduct(FVector::UpVector, forward);
 					right.Normalize();
 
-					FVector move = forward * CameraInput.Y * TranslationTweaker + right * CameraInput.X * TranslationTweaker;
+					float tweak = PrecisionMode ? TranslationTweaker / 10.0f : TranslationTweaker;
+					FVector move = forward * CameraInput.Y * tweak + right * CameraInput.X * tweak;
 					mTarget->Move(FRotator::ZeroRotator, move);
 				}
 			}
@@ -120,9 +124,13 @@ void APlayerPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAction("ToggleCursor", IE_Released, this, &APlayerPawn::ToggleCursor);
 	InputComponent->BindAction("Interact", IE_Pressed, this, &APlayerPawn::InteractStart);
 	InputComponent->BindAction("Interact", IE_Released, this, &APlayerPawn::InteractEnd);
+	InputComponent->BindAction("TogglePrecisionMode", IE_Pressed, this, &APlayerPawn::TogglePrecisionMode);
+	InputComponent->BindAction("TogglePrecisionMode", IE_Released, this, &APlayerPawn::TogglePrecisionMode);
 
 	//xoxo
 	InputComponent->BindAction("SwitchCamera", IE_Released, this, &APlayerPawn::SwitchCamera);
+
+	InputComponent->BindAction("ChangeInteractionType", IE_Released, this, &APlayerPawn::ChangeInteractionType);
 
 	//Hook up every-frame handling for our four axes
 	InputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
@@ -130,6 +138,14 @@ void APlayerPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAxis("MoveUp", this, &APlayerPawn::MoveUp);
 	InputComponent->BindAxis("CameraPitch", this, &APlayerPawn::PitchCamera);
 	InputComponent->BindAxis("CameraYaw", this, &APlayerPawn::YawCamera);
+}
+
+void APlayerPawn::ChangeInteractionType()
+{
+	if (InteractionType == EInteractionType::IT_Rotation)
+		InteractionType = EInteractionType::IT_Translation;
+	else
+		InteractionType = EInteractionType::IT_Rotation;
 }
 
 void APlayerPawn::MoveForward(float AxisValue)
@@ -267,4 +283,9 @@ void APlayerPawn::SwitchCamera()
 		Camera->SetWorldRotation(myRot.Quaternion()); //looking bot
 		isOnTop = true;
 	}
+}
+
+void APlayerPawn::TogglePrecisionMode()
+{
+	PrecisionMode = !PrecisionMode;
 }
