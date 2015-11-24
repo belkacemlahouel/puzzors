@@ -5,29 +5,59 @@
 #include "LazorManager.h"
 #include "LazorTarget.h"
 #include "ReactOnLazorHit.h"
+#include "PuzzorsGameMode.h"
 
-UBeam::UBeam() : m_position(), m_direction(1, 0, 0), m_manager(NULL), m_root(NULL)
-{}
-
-UBeam::UBeam(const FVector& _position, const FVector& _direction, ULazorManager* _manager) : m_position(_position), m_direction(_direction), m_manager(_manager), m_root(NULL)
-{}
-
-UBeam::~UBeam()
-{}
-
-void UBeam::Activate()
+ABeam::ABeam() : m_direction(1, 0, 0), ParticleTemplate(nullptr), m_root(nullptr), m_color(0.88f, 0.1056f, 0.1056f)
 {
-	FireBeam();
-	m_manager->GetWorld()->GetTimerManager().SetTimer(m_TimerHandle, this, &UBeam::FireBeam, 0.10f, true);
+	PrimaryActorTick.bCanEverTick = false;
+
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 }
 
-void UBeam::Deactivate()
+ABeam::ABeam(const FVector& _direction) : m_direction(_direction), ParticleTemplate(nullptr), m_root(nullptr)
 {
-	m_manager->GetWorld()->GetTimerManager().ClearTimer(m_TimerHandle);
+	PrimaryActorTick.bCanEverTick = false;
+}
+
+ABeam::~ABeam()
+{}
+
+
+void ABeam::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
+void ABeam::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APuzzorsGameMode* mode = Cast<APuzzorsGameMode>(GetWorld()->GetAuthGameMode());
+	if (mode != nullptr)
+		ParticleTemplate = mode->ParticleTemplate;
+}
+
+void ABeam::BeginDestroy()
+{
+	Super::BeginDestroy();
+	if (m_TimerHandle.IsValid() && GetWorld() != nullptr)
+		GetWorld()->GetTimerManager().ClearTimer(m_TimerHandle);
+	ClearBeam(false);
+}
+
+void ABeam::Activate()
+{
+	FireBeam();
+	GetWorld()->GetTimerManager().SetTimer(m_TimerHandle, this, &ABeam::FireBeam, 0.10f, true);
+}
+
+void ABeam::Deactivate()
+{
+	GetWorld()->GetTimerManager().ClearTimer(m_TimerHandle);
 	ClearBeam(true);
 }
 
-void UBeam::FireBeam()
+void ABeam::FireBeam()
 {
 	if (!Initialized())
 		return;
@@ -37,8 +67,8 @@ void UBeam::FireBeam()
 
 	bool loop;
 
-	FVector pos = m_position, dir = m_direction;
-	FLazor* lazor = NULL;
+	FVector pos = GetActorLocation(), dir = m_direction;
+	FLazor* lazor = nullptr;
 	do
 	{
 		loop = false;
@@ -48,7 +78,7 @@ void UBeam::FireBeam()
 		lazor = InstanciateLazor(particle, lazor);
 		lazor->SetPosition(pos);
 		lazor->SetDirection(dir);
-		if (m_root == NULL) m_root = lazor;
+		if (m_root == nullptr) m_root = lazor;
 
 		// computing target
 		FHitResult hit;
@@ -56,12 +86,13 @@ void UBeam::FireBeam()
 		bool hasHit = hit.IsValidBlockingHit();
 		lazor->SetTarget(target);
 		particle->SetActorParameter("Target", target);
+		particle->SetColorParameter("Color", m_color);
 
 		// what have we hit
 		if (hasHit)
 		{
 			UReactOnLazorHit* reactor = ExtractReactorFromActor(hit.GetActor());
-			if (reactor != NULL)
+			if (reactor != nullptr)
 			{
 				m_hit.Add(FLazorHit(reactor, lazor, hit));
 				reactor->OnLazorHit(hit.ImpactPoint, dir, this);
@@ -117,7 +148,7 @@ void UBeam::FireBeam()
 	}
 }
 
-bool UBeam::HasHit(UReactOnLazorHit* _reactor)
+bool ABeam::HasHit(UReactOnLazorHit* _reactor)
 {
 	for (auto lh : m_hit)
 	{
@@ -128,7 +159,7 @@ bool UBeam::HasHit(UReactOnLazorHit* _reactor)
 	return false;
 }
 
-void UBeam::ClearBeam(bool _callHitEnd)
+void ABeam::ClearBeam(bool _callHitEnd)
 {
 	if (_callHitEnd)
 	{
@@ -137,8 +168,8 @@ void UBeam::ClearBeam(bool _callHitEnd)
 	}
 
 	FLazor* l = m_root;
-	FLazor* temp = NULL;
-	while (l != NULL)
+	FLazor* temp = nullptr;
+	while (l != nullptr)
 	{
 		temp = l;
 		l = l->Child();
@@ -146,16 +177,16 @@ void UBeam::ClearBeam(bool _callHitEnd)
 		temp->DestroyLazor();
 		delete temp;
 	}
-	m_root = NULL;
+	m_root = nullptr;
 
 	m_hit.Empty();
 }
 
-UReactOnLazorHit* UBeam::ExtractReactorFromActor(AActor* _actor)
+UReactOnLazorHit* ABeam::ExtractReactorFromActor(AActor* _actor)
 {
-	if (_actor == NULL) return NULL;
+	if (_actor == nullptr) return nullptr;
 
-	UReactOnLazorHit* reactor = NULL;
+	UReactOnLazorHit* reactor = nullptr;
 
 	TArray<UActorComponent*> components = _actor->GetComponents();
 	for (UActorComponent* comp : components)
@@ -171,36 +202,33 @@ UReactOnLazorHit* UBeam::ExtractReactorFromActor(AActor* _actor)
 	return reactor;
 }
 
-UParticleSystemComponent* UBeam::InstantiateParticleSystem(const FVector& _location, const FRotator& _direction)
+UParticleSystemComponent* ABeam::InstantiateParticleSystem(const FVector& _location, const FRotator& _direction)
 {
-	UParticleSystemComponent* particleSystem = UGameplayStatics::SpawnEmitterAttached(m_manager->ParticleTemplate, m_manager, NAME_None, _location, _direction);
+	UParticleSystemComponent* particleSystem = UGameplayStatics::SpawnEmitterAttached(ParticleTemplate, RootComponent, NAME_None, _location, _direction, EAttachLocation::KeepWorldPosition);
 	FParticleSysParam param;
 	param.Name = "Target";
 	param.ParamType = EParticleSysParamType::PSPT_Actor;
+
+	FParticleSysParam colorParam;
+	colorParam.Name = "Color";
+	colorParam.ParamType = EParticleSysParamType::PSPT_Color;
+
 	particleSystem->InstanceParameters.Add(param);
+	particleSystem->InstanceParameters.Add(colorParam);
 	particleSystem->UpdateInstances(true);
 	particleSystem->ActivateSystem();
 
 	return particleSystem;
 }
-/*
-FLazor* UBeam::InstanciateLazor(UParticleSystemComponent* _particle, FLazor* _parent)
-{
-	FLazor* lazor = new FLazor();
-	lazor->SetParticleSystem(_particle);
-	lazor->SetParent(_parent);
-	if (_parent != NULL) _parent->SetChild(lazor);
-	return lazor;
-}*/
 
-AActor* UBeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult)
+AActor* ABeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult)
 {
 	// Create the target
 	AActor* target = GetWorld()->SpawnActor(ALazorTarget::StaticClass());
 
 	// Search for the target's position
 	FVector dir = _inDir;
-	FVector end = _inPos + dir * 100000; // Relative is used because the LazorManager is centered (pos={0,0,0})
+	FVector end = _inPos + dir * 100000;
 	bool hasHit = GetWorld()->LineTraceSingleByChannel(_outHitResult, _inPos, end, ECC_PhysicsBody);
 	if (hasHit)
 		target->SetActorLocation(_outHitResult.ImpactPoint);
@@ -208,10 +236,4 @@ AActor* UBeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, 
 		target->SetActorLocation(end);
 
 	return target;
-}
-
-UWorld* UBeam::GetWorld() const
-{
-	if (m_manager == NULL) return NULL; 
-	return m_manager->GetWorld();
 }

@@ -20,9 +20,10 @@ public:
 	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	void BeginPlay();
 
-	UFUNCTION(BlueprintCallable, Category="Lazor Manager")
-		ULazorManager* LazorManager() { return m_LazorManager; }
+	UFUNCTION(BlueprintCallable, Category = "Movable")
+		void LockEveryMovable();
 	
-private:
-	ULazorManager* m_LazorManager;
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effects)
+		UParticleSystem* ParticleTemplate;
 };

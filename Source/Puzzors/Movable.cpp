@@ -14,6 +14,7 @@ UMovable::UMovable()
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
 
+	m_lock = false;
 	// ...
 }
 
@@ -38,10 +39,13 @@ void UMovable::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UMovable::Move(const FRotator& _RotationDeltas, const FVector& _TranslationDeltas)
 {
-	Rotate(_RotationDeltas);
-	Translate(_TranslationDeltas);
+	if (!m_lock && !(_RotationDeltas.IsNearlyZero() && _TranslationDeltas.IsNearlyZero()))
+	{
+		Rotate(_RotationDeltas);
+		Translate(_TranslationDeltas);
 
-	SendMoveEvent();
+		SendMoveEvent();
+	}
 }
 
 void UMovable::SendMoveEvent()

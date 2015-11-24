@@ -3,6 +3,7 @@
 #include "Puzzors.h"
 #include "PuzzorsGameMode.h"
 #include "LazorManager.h"
+#include "Movable.h"
 
 
 void APuzzorsGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -14,8 +15,15 @@ void APuzzorsGameMode::InitGame(const FString& MapName, const FString& Options, 
 
 void APuzzorsGameMode::BeginPlay()
 {
-	for (TObjectIterator<ULazorManager> Itr; Itr; ++Itr)
+	Super::BeginPlay();
+
+}
+
+void APuzzorsGameMode::LockEveryMovable()
+{
+	for (TObjectIterator<UMovable> Itr; Itr; ++Itr)
 	{
-		m_LazorManager = *Itr;
+		if (Itr->GetWorld() == GetWorld())
+			Itr->Lock();
 	}
 }

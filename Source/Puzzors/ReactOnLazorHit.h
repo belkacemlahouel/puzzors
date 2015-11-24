@@ -5,7 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "ReactOnLazorHit.generated.h"
 
-class UBeam;
+class ABeam;
 
 UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PUZZORS_API UReactOnLazorHit : public UActorComponent
@@ -17,13 +17,13 @@ public:
 	UReactOnLazorHit();
 
 	UFUNCTION(BlueprintImplementableEvent)
-		virtual void OnLazorHit(const FVector& _hitPos, const FVector& _hitDir, UBeam* _beam);
+		virtual void OnLazorHit(const FVector& _hitPos, const FVector& _hitDir, ABeam* _beam);
 
 	UFUNCTION(BlueprintImplementableEvent)
-		virtual void OnLazorHitBegin(const FVector& _hitPos, const FVector& _hitDir, UBeam* _beam);
+		virtual void OnLazorHitBegin(const FVector& _hitPos, const FVector& _hitDir, ABeam* _beam);
 
 	UFUNCTION(BlueprintImplementableEvent)
-		virtual void OnLazorHitEnd(UBeam* _beam);
+		virtual void OnLazorHitEnd(ABeam* _beam);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Lazor Reaction")
 		bool IsBouncingLazor(const FVector& _hitPoint);

@@ -29,6 +29,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Movable")
 		FMoveDelegate OnMove;
 
+	UFUNCTION(BlueprintCallable, Category = "Movable")
+		bool IsLocked() { return m_lock; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movable")
+		void Lock() { m_lock = true; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movable")
+		void UnLock() { m_lock = false; }
+
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Movable")
 		void Rotate(const FRotator& _Deltas);
@@ -39,4 +48,6 @@ protected:
 private:
 	void SendMoveEvent();
 
+	UPROPERTY(EditAnywhere)
+		bool m_lock;
 };

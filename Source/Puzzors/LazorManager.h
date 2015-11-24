@@ -7,7 +7,7 @@
 #include "LazorManager.generated.h"
 
 class ULazor;
-class UBeam;
+class ABeam;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PUZZORS_API ULazorManager : public USceneComponent
@@ -22,12 +22,12 @@ public:
 	
 	// Create a Lazor emitted by _source actor, at _inPos position and going to _inDir direction.
 	UFUNCTION(BlueprintCallable, Category = "Lazor Creation")
-		UBeam* CreateBeam(const FVector& _inPos, const FVector& _inDir);
+		ABeam* CreateBeam(const FVector& _inPos, const FVector& _inDir);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effects)
 		UParticleSystem* ParticleTemplate;
 
-	TArray<UBeam*> Beams;
+	TArray<ABeam*> Beams;
 
 };

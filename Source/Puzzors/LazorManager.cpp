@@ -28,16 +28,7 @@ void ULazorManager::BeginDestroy()
 	Beams.Empty();
 }
 
-UBeam* ULazorManager::CreateBeam(const FVector& _inPos, const FVector& _inDir)
+ABeam* ULazorManager::CreateBeam(const FVector& _inPos, const FVector& _inDir)
 {
-	UBeam* beam = NewObject<UBeam>();
-	beam->SetManager(this);
-	beam->SetPosition(_inPos);
-	beam->SetDirection(_inDir);
-
-	beam->FireBeam();
-
-	Beams.Add(beam);
-
-	return beam;
+	return nullptr;
 }

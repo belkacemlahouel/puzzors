@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Object.h"
+#include "GameFramework/Actor.h"
 #include "Beam.generated.h"
 
 class UReactOnLazorHit;
@@ -130,14 +130,22 @@ struct FLazorHit
  * 
  */
 UCLASS(Blueprintable)
-class PUZZORS_API UBeam : public UObject
+class PUZZORS_API ABeam : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	UBeam();
-	UBeam(const FVector& _position, const FVector& _direction, ULazorManager* _manager);
-	virtual ~UBeam();
+	ABeam();
+	ABeam(const FVector& _direction);
+	virtual ~ABeam();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	// Called every frame
+	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void BeginDestroy() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Beam")
 		void Activate();
@@ -152,27 +160,22 @@ public:
 
 	bool HasHit(UReactOnLazorHit* _reactor);
 
-	bool Initialized() { return m_manager != NULL; }
-
-	UWorld* GetWorld() const override;
+	bool Initialized() { return ParticleTemplate != nullptr; }
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Beam")
-		void SetPosition(const FVector& _position) { m_position = _position; }
-	UFUNCTION(BlueprintCallable, Category = "Beam")
 		void SetDirection(const FVector& _direction) { m_direction = _direction; }
 	
-	void SetManager(ULazorManager* _manager) { m_manager = _manager; }
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		void SetColor(const FLinearColor& _color) { m_color = _color; }
 
 private:
 	FLazor* m_root;
-
-	FVector m_position;
 	FVector m_direction;
 
-	TArray<FLazorHit> m_hit;
+	FLinearColor m_color;
 
-	ULazorManager* m_manager;
+	TArray<FLazorHit> m_hit;
 
 	FTimerHandle m_TimerHandle;
 
@@ -189,4 +192,6 @@ private:
 
 	AActor* ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, FHitResult& _outHitResult);
 	UReactOnLazorHit* ExtractReactorFromActor(AActor* _actor);
+
+	UParticleSystem* ParticleTemplate;
 };
