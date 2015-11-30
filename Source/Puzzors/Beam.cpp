@@ -7,7 +7,7 @@
 #include "ReactOnLazorHit.h"
 #include "PuzzorsGameMode.h"
 
-ABeam::ABeam() : m_direction(1, 0, 0), ParticleTemplate(nullptr), m_root(nullptr), m_color(0.88f, 0.1056f, 0.1056f)
+ABeam::ABeam() : m_direction(1, 0, 0), ParticleTemplate(nullptr), m_root(nullptr), m_color(EBeamColor::BC_RED)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -86,7 +86,7 @@ void ABeam::FireBeam()
 		bool hasHit = hit.IsValidBlockingHit();
 		lazor->SetTarget(target);
 		particle->SetActorParameter("Target", target);
-		particle->SetColorParameter("Color", m_color);
+		particle->SetColorParameter("Color", BeamColorToLinearColor(m_color));
 
 		// what have we hit
 		if (hasHit)
@@ -236,4 +236,16 @@ AActor* ABeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, 
 		target->SetActorLocation(end);
 
 	return target;
+}
+
+FLinearColor ABeam::BeamColorToLinearColor(EBeamColor _color)
+{
+	switch (_color)
+	{
+	case EBeamColor::BC_RED: return BEAM_RED_COLOR;
+	case EBeamColor::BC_GREEN: return BEAM_GREEN_COLOR;
+	case EBeamColor::BC_BLUE: return BEAM_BLUE_COLOR;
+	}
+
+	return BEAM_DEFAULT_COLOR;
 }

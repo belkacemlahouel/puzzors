@@ -8,6 +8,20 @@
 class UReactOnLazorHit;
 class ULazorManager;
 
+#define BEAM_RED_COLOR FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)
+#define BEAM_GREEN_COLOR FLinearColor(0.0f, 1.0f, 0.0f, 1.0f)
+#define BEAM_BLUE_COLOR FLinearColor(0.0f, 0.0f, 1.0f, 1.0f)
+#define BEAM_DEFAULT_COLOR FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)
+
+
+UENUM(BlueprintType)
+enum class EBeamColor : uint8
+{
+	BC_RED		UMETA(DisplayName = "RedBeam"),
+	BC_GREEN	UMETA(DisplayName = "GreemBeam"),
+	BC_BLUE		UMETA(DisplayName = "BlueBeam")
+};
+
 class FLazor
 {
 public:
@@ -162,18 +176,24 @@ public:
 
 	bool Initialized() { return ParticleTemplate != nullptr; }
 
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		static FLinearColor BeamColorToLinearColor(EBeamColor _color);
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Beam")
 		void SetDirection(const FVector& _direction) { m_direction = _direction; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Beam")
-		void SetColor(const FLinearColor& _color) { m_color = _color; }
+		void SetColor(EBeamColor _color) { m_color = _color; }
+
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		EBeamColor Color() { return m_color; }
 
 private:
 	FLazor* m_root;
 	FVector m_direction;
 
-	FLinearColor m_color;
+	EBeamColor m_color;
 
 	TArray<FLazorHit> m_hit;
 
