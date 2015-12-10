@@ -7,7 +7,7 @@
 #include "ReactOnLazorHit.h"
 #include "PuzzorsGameMode.h"
 
-ABeam::ABeam() : m_direction(1, 0, 0), ParticleTemplate(nullptr), m_root(nullptr), m_color(EBeamColor::BC_RED)
+ABeam::ABeam() : m_direction(1, 0, 0), ParticleTemplate(nullptr), m_root(nullptr), m_color(EBeamColor::BC_RED), m_fired(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -49,12 +49,14 @@ void ABeam::Activate()
 {
 	FireBeam();
 	GetWorld()->GetTimerManager().SetTimer(m_TimerHandle, this, &ABeam::FireBeam, 0.10f, true);
+	m_fired = true;
 }
 
 void ABeam::Deactivate()
 {
 	GetWorld()->GetTimerManager().ClearTimer(m_TimerHandle);
 	ClearBeam(true);
+	m_fired = false;
 }
 
 void ABeam::FireBeam()

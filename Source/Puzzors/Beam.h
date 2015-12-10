@@ -205,6 +205,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Beam")
 		EBeamColor Color() { return m_color; }
 
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		bool IsFired() { return m_fired; }
+
 private:
 	FLazor* m_root;
 	FVector m_direction;
@@ -214,6 +217,8 @@ private:
 	TArray<FLazorHit> m_hit;
 
 	FTimerHandle m_TimerHandle;
+
+	bool m_fired;
 
 private:
 	FLazor* InstanciateLazor(UParticleSystemComponent* _particle, FLazor* _parent)
