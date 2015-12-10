@@ -13,7 +13,7 @@ UReactOnLazorHit::UReactOnLazorHit()
 	// ...
 }
 
-bool UReactOnLazorHit::IsBouncingLazor_Implementation(const FVector& _hitPoint)
+bool UReactOnLazorHit::IsBouncingLazor_Implementation(const FVector& _hitPoint, const UPrimitiveComponent* _hitComponent)
 {
 	return false;
 }

@@ -6,7 +6,7 @@
 #include "MainPlayerController.h"
 #include "PuzzorsGameMode.generated.h"
 
-class ULazorManager;
+class UReceiverReaction;
 
 /**
  * 
@@ -22,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Movable")
 		void LockEveryMovable();
+
+	UFUNCTION(BlueprintCallable, Category = "Get Every Receptors")
+		TArray<UReceiverReaction*> GetReceptorsInScene();
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effects)

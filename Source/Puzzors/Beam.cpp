@@ -95,8 +95,8 @@ void ABeam::FireBeam()
 			if (reactor != nullptr)
 			{
 				m_hit.Add(FLazorHit(reactor, lazor, hit));
-				reactor->OnLazorHit(hit.ImpactPoint, dir, this);
-				if (lazor->Index() < 10 && reactor->IsBouncingLazor(hit.ImpactPoint))
+				reactor->OnLazorHit(hit.ImpactPoint, dir, hit.Component.Get(), this);
+				if (lazor->Index() < 10 && reactor->IsBouncingLazor(hit.ImpactPoint, hit.Component.Get()))
 				{
 					pos = hit.ImpactPoint;
 					dir = reactor->BounceLazor(dir);
@@ -124,7 +124,7 @@ void ABeam::FireBeam()
 
 		if (!found) // newly hit
 		{
-			h.Reactor()->OnLazorHitBegin(h.hit.ImpactPoint, h.Lazor()->Direction(), this);
+			h.Reactor()->OnLazorHitBegin(h.hit.ImpactPoint, h.Lazor()->Direction(), h.hit.Component.Get(), this);
 		}
 	}
 

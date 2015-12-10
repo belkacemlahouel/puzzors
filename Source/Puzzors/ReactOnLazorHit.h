@@ -17,16 +17,16 @@ public:
 	UReactOnLazorHit();
 
 	UFUNCTION(BlueprintImplementableEvent)
-		virtual void OnLazorHit(const FVector& _hitPos, const FVector& _hitDir, ABeam* _beam);
+		virtual void OnLazorHit(const FVector& _hitPos, const FVector& _hitDir, const UPrimitiveComponent* _hitComponent, ABeam* _beam);
 
 	UFUNCTION(BlueprintImplementableEvent)
-		virtual void OnLazorHitBegin(const FVector& _hitPos, const FVector& _hitDir, ABeam* _beam);
+		virtual void OnLazorHitBegin(const FVector& _hitPos, const FVector& _hitDir, const UPrimitiveComponent* _hitComponent, ABeam* _beam);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		virtual void OnLazorHitEnd(ABeam* _beam);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Lazor Reaction")
-		bool IsBouncingLazor(const FVector& _hitPoint);
+		bool IsBouncingLazor(const FVector& _hitPoint, const UPrimitiveComponent* _hitComponent);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Lazor Reaction")
 		FVector BounceLazor(const FVector& _dir);
