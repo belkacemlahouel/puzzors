@@ -12,8 +12,13 @@ UCLASS()
 class PUZZORS_API UReceiverReaction : public UReactOnLazorHit
 {
 	GENERATED_BODY()
-	
-	
-	
+
+public:
+	UFUNCTION(Blueprintcallable, Category = "Receiver Reaction")
+		bool IsActivated() { return Active; }
+
+protected:
+	UPROPERTY(BlueprintReadWrite)
+		bool Active;
 	
 };

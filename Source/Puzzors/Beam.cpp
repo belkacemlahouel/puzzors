@@ -115,7 +115,7 @@ void ABeam::FireBeam()
 		bool found = false;
 		for (auto oh : oldHit)
 		{
-			if (h.reactor == oh.reactor) // was already hit
+			if (h.reactor == oh.reactor && h.hit.Component.Get() == oh.hit.Component.Get()) // was already hit
 			{
 				found = true;
 				break;
@@ -134,7 +134,7 @@ void ABeam::FireBeam()
 		bool found = false;
 		for (auto h : m_hit)
 		{
-			if (oh.reactor == h.reactor) // was already
+			if (oh.reactor == h.reactor && h.hit.Component.Get() == oh.hit.Component.Get()) // was already
 			{
 				found = true;
 				break;
@@ -143,7 +143,7 @@ void ABeam::FireBeam()
 
 		if (!found) // was hit but now is not
 		{
-			oh.Reactor()->OnLazorHitEnd(this);
+			oh.Reactor()->OnLazorHitEnd(oh.hit.Component.Get(), this);
 		}
 	}
 }
@@ -164,7 +164,7 @@ void ABeam::ClearBeam(bool _callHitEnd)
 	if (_callHitEnd)
 	{
 		for (auto lh : m_hit)
-			lh.Reactor()->OnLazorHitEnd(this);
+			lh.Reactor()->OnLazorHitEnd(lh.hit.Component.Get(), this);
 	}
 
 	FLazor* l = m_root;
@@ -240,12 +240,24 @@ AActor* ABeam::ComputeLazorTarget(const FVector& _inPos, const FVector& _inDir, 
 
 FLinearColor ABeam::BeamColorToLinearColor(EBeamColor _color)
 {
-	switch (_color)
-	{
-	case EBeamColor::BC_RED: return BEAM_RED_COLOR;
-	case EBeamColor::BC_GREEN: return BEAM_GREEN_COLOR;
-	case EBeamColor::BC_BLUE: return BEAM_BLUE_COLOR;
-	}
+	REGISTER_COLOR_BEGIN(_color)
 
-	return BEAM_DEFAULT_COLOR;
+		REGISTER_COLOR(BC_RED, BEAM_RED_COLOR)
+		REGISTER_COLOR(BC_BLUE, BEAM_BLUE_COLOR)
+		REGISTER_COLOR(BC_GREEN, BEAM_GREEN_COLOR)
+		REGISTER_COLOR(BC_YELLOW, BEAM_YELLOW_COLOR)
+		REGISTER_COLOR(BC_PURPLE, BEAM_PURPLE_COLOR)
+		REGISTER_COLOR(BC_CYAN, BEAM_CYAN_COLOR)
+		REGISTER_COLOR(BC_WHITE, BEAM_WHITE_COLOR)
+	
+	REGISTER_COLOR_END
+}
+
+EBeamColor ABeam::AddColor(EBeamColor _color1, EBeamColor _color2)
+{
+	REGISTER_ADD_COLOR(BC_RED, BC_BLUE, BC_PURPLE)
+	REGISTER_ADD_COLOR(BC_RED, BC_GREEN, BC_YELLOW)
+	REGISTER_ADD_COLOR(BC_BLUE, BC_GREEN, BC_CYAN)
+
+	return EBeamColor::BC_WHITE;
 }

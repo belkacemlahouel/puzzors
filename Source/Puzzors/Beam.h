@@ -11,15 +11,28 @@ class ULazorManager;
 #define BEAM_RED_COLOR FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)
 #define BEAM_GREEN_COLOR FLinearColor(0.0f, 1.0f, 0.0f, 1.0f)
 #define BEAM_BLUE_COLOR FLinearColor(0.0f, 0.0f, 1.0f, 1.0f)
+#define BEAM_YELLOW_COLOR FLinearColor(1.0f, 1.0f, 0.0f, 1.0f)
+#define BEAM_PURPLE_COLOR FLinearColor(1.0f, 0.0f, 1.0f, 1.0f)
+#define BEAM_CYAN_COLOR FLinearColor(0.0f, 1.0f, 1.0f, 1.0f)
+#define BEAM_WHITE_COLOR FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)
 #define BEAM_DEFAULT_COLOR FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
+#define REGISTER_COLOR_BEGIN(var) switch(var) {
+#define REGISTER_COLOR(a, b) case(EBeamColor::a): return b;
+#define REGISTER_COLOR_END default: return FLinearColor(0.0f, 0.0f, 0.0f, 1.0f); }
+
+#define REGISTER_ADD_COLOR(a, b, c) if((_color1 == EBeamColor::a && _color2 == EBeamColor::b) || (_color2 == EBeamColor::a && _color1 == EBeamColor::b)) return EBeamColor::c;
 
 UENUM(BlueprintType)
 enum class EBeamColor : uint8
 {
 	BC_RED		UMETA(DisplayName = "RedBeam"),
-	BC_GREEN	UMETA(DisplayName = "GreemBeam"),
-	BC_BLUE		UMETA(DisplayName = "BlueBeam")
+	BC_GREEN	UMETA(DisplayName = "GreenBeam"),
+	BC_BLUE		UMETA(DisplayName = "BlueBeam"),
+	BC_YELLOW	UMETA(DisplayName = "YellowBeam"),
+	BC_PURPLE	UMETA(DisplayName = "PurpleBeam"),
+	BC_CYAN		UMETA(DisplayName = "CyanBeam"),
+	BC_WHITE	UMETA(DisplayName = "WhiteBeam"),
 };
 
 class FLazor
@@ -178,6 +191,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Beam")
 		static FLinearColor BeamColorToLinearColor(EBeamColor _color);
+
+	UFUNCTION(BlueprintCallable, Category = "Beam")
+		static EBeamColor AddColor(EBeamColor _color1, EBeamColor _color2);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Beam")
