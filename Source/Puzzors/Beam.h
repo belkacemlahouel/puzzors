@@ -15,6 +15,7 @@ class ULazorManager;
 #define BEAM_PURPLE_COLOR FLinearColor(1.0f, 0.0f, 1.0f, 1.0f)
 #define BEAM_CYAN_COLOR FLinearColor(0.0f, 1.0f, 1.0f, 1.0f)
 #define BEAM_WHITE_COLOR FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)
+#define BEAM_NONE_COLOR FLinearColor(0.127f, 0.127f, 0.127f)
 #define BEAM_DEFAULT_COLOR FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
 #define REGISTER_COLOR_BEGIN(var) switch(var) {
@@ -33,6 +34,8 @@ enum class EBeamColor : uint8
 	BC_PURPLE	UMETA(DisplayName = "PurpleBeam"),
 	BC_CYAN		UMETA(DisplayName = "CyanBeam"),
 	BC_WHITE	UMETA(DisplayName = "WhiteBeam"),
+
+	BC_NONE		UMETA(DisplayName = "None"),
 };
 
 class FLazor
