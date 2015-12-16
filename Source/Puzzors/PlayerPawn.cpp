@@ -5,7 +5,6 @@
 
 #include "Movable.h"
 
-
 // Sets default values
 APlayerPawn::APlayerPawn() : bShowCursor(false), mController(NULL), mTarget(NULL)
 {
@@ -277,7 +276,7 @@ void APlayerPawn::SwitchCamera()
 	{
 		previousLocation = GetActorLocation();
 		previousRotation = Camera->GetComponentRotation().Quaternion();
-		FVector myLoc = FVector(0, 0, 1000);
+		FVector myLoc = FVector(0, 0, 5000);
 		SetActorLocation(myLoc); //on-top location
 		FRotator myRot(-90, 0, 0);
 		Camera->SetWorldRotation(myRot.Quaternion()); //looking bot
