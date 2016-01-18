@@ -33,7 +33,7 @@ TArray<UReceiverReaction*> APuzzorsGameMode::GetReceptorsInScene()
 	TArray<UReceiverReaction*> receivers;
 	for (TObjectIterator<UReceiverReaction> Itr; Itr; ++Itr)
 	{
-		if (Itr->GetWorld() == GetWorld())
+		if (Itr->GetWorld() == GetWorld() && !Itr->IsBeingDestroyed())
 			receivers.Add(*Itr);
 	}
 
